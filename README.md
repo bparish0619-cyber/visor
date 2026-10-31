@@ -34,7 +34,7 @@ Visor works with Ray-Ban Meta, Oakley Meta and the other Meta glasses. It speaks
 | **Home** | A 3D model of your pair, lit by a light that shows their state: connected, charging, asleep, recording, out of reach. Under it: both batteries, free space, volume, temperature and your latest photos. |
 | **Gallery** | Imports photos and videos over Wi-Fi Direct, on its own while the glasses charge or when you ask. Live photos become Motion Photos. Files go to `Pictures/Visor` and `Movies/Visor`. |
 | **Live view** | The glasses' camera on your phone, with recording, an instant replay of the last minutes, snapshots, RTMP broadcast and Live AI. |
-| **Assistant** | "Hey Meta" goes to your own model: Claude, or any OpenAI-compatible endpoint. The glasses read the answer in their own voice. A diary on the phone keeps every conversation, and you can continue one from the app. |
+| **Assistant** | "Hey Meta" goes to your own model: Claude, Muse, or any OpenAI-compatible endpoint. The glasses read the answer in their own voice. A diary on the phone keeps every conversation, and you can continue one from the app. |
 | **Notifications** | Message notifications go to the glasses, which announce the sender by the name in your contacts. |
 | **Settings** | Every setting the glasses have, the way the Meta app shows them. Advanced holds the rest, assistant language packs and the firmware's feature flags. |
 | **Outside the app** | A home screen widget, a Quick Settings tile, launcher shortcuts, and a Live Update notification while the Live view runs. |
@@ -45,7 +45,7 @@ Visor works with Ray-Ban Meta, Oakley Meta and the other Meta glasses. It speaks
 - **Glasses:** a pair of Meta glasses, such as Ray-Ban Meta or Oakley Meta. Support for the Meta Ray-Ban Display is limited and lives on the [`display`](https://github.com/macedonga/visor/tree/display) branch.
 - **Phone:** Android 10 or later.
 - **Meta account**, for setup. Log in with a password or an email code. Passkeys do not work.
-- **For the assistant:** an API key from Anthropic or from an OpenAI-compatible service.
+- **For the assistant:** an API key from Anthropic, from Meta's Model API (dev.meta.ai) or from an OpenAI-compatible service.
 
 ## Install
 

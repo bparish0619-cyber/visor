@@ -89,7 +89,7 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
 
     var check by remember { mutableStateOf<KeyCheck>(KeyCheck.None) }
     LaunchedEffect(config.provider, config.apiKey, config.baseUrl) {
-        if (config.provider == Provider.CLAUDE && config.apiKey.isBlank()) {
+        if (config.provider != Provider.OPENAI_COMPATIBLE && config.apiKey.isBlank()) {
             check = KeyCheck.None
             return@LaunchedEffect
         }
@@ -105,6 +105,7 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
     var trying by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val claude = config.provider == Provider.CLAUDE
+    val muse = config.provider == Provider.MUSE
     val known = model.settings.specs.keys
 
     SettingsPage(stringResource(R.string.topic_meta_ai), stringResource(R.string.ai_lede)) {
@@ -125,9 +126,20 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
                     {
                         PillsRow(
                             stringResource(R.string.ai_provider),
-                            listOf(Provider.CLAUDE to "Claude", Provider.OPENAI_COMPATIBLE to stringResource(R.string.ai_openai_compatible)),
+                            listOf(Provider.CLAUDE to "Claude", Provider.MUSE to "Muse", Provider.OPENAI_COMPATIBLE to stringResource(R.string.ai_openai_compatible)),
                             config.provider,
-                            onPick = { p -> model.store.update { it.copy(provider = p) } },
+                            // Muse lives at Meta's address: picking it writes that address. Leaving it for a
+                            // server of the wearer's own puts the OpenAI default back, if Meta's is still there.
+                            onPick = { p ->
+                                model.store.update {
+                                    when (p) {
+                                        Provider.MUSE -> it.copy(provider = p, baseUrl = MUSE_BASE_URL)
+                                        Provider.OPENAI_COMPATIBLE ->
+                                            it.copy(provider = p, baseUrl = if (it.baseUrl == MUSE_BASE_URL) OPENAI_BASE_URL else it.baseUrl)
+                                        Provider.CLAUDE -> it.copy(provider = p)
+                                    }
+                                }
+                            },
                         )
                     },
                     if (!claude) row {
@@ -135,7 +147,7 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
                     } else null,
                     {
                         val (sub, problem) = when (val c = check) {
-                            KeyCheck.None -> (if (claude) stringResource(R.string.ai_key_needed) else stringResource(R.string.ai_key_optional)) to null
+                            KeyCheck.None -> (if (claude) stringResource(R.string.ai_key_needed) else if (muse) stringResource(R.string.ai_key_needed_muse) else stringResource(R.string.ai_key_optional)) to null
                             KeyCheck.Checking -> stringResource(R.string.ai_key_checking) to null
                             is KeyCheck.Works -> stringResource(R.string.ai_key_works, c.models.size) to null
                             is KeyCheck.Refused -> null to stringResource(R.string.ai_key_refused, c.words)
@@ -150,7 +162,7 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
                     {
                         ValueRow(
                             stringResource(R.string.ai_model),
-                            modelWords(config.model.ifBlank { if (claude) DEFAULT_CLAUDE else "" }).ifEmpty { stringResource(R.string.settings_not_set) },
+                            modelWords(config.model.ifBlank { if (claude) DEFAULT_CLAUDE else if (muse) DEFAULT_MUSE else "" }).ifEmpty { stringResource(R.string.settings_not_set) },
                             onClick = { sheet = "model" },
                         )
                     },
@@ -291,7 +303,7 @@ fun AssistantSettingsScreen(open: (NavKey) -> Unit, model: AssistantViewModel = 
                 title = stringResource(if (lines) R.string.ai_lines_model else R.string.ai_model),
                 check = check,
                 current = if (lines) config.linesModel else config.model,
-                emptyLabel = if (lines) stringResource(R.string.ai_same_model) else if (claude) stringResource(R.string.ai_default_model, modelWords(DEFAULT_CLAUDE)) else null,
+                emptyLabel = if (lines) stringResource(R.string.ai_same_model) else if (claude) stringResource(R.string.ai_default_model, modelWords(DEFAULT_CLAUDE)) else if (muse) stringResource(R.string.ai_default_model, modelWords(DEFAULT_MUSE)) else null,
                 onPick = { id -> model.store.update { if (lines) it.copy(linesModel = id) else it.copy(model = id) } },
                 onDismiss = { sheet = null },
             )

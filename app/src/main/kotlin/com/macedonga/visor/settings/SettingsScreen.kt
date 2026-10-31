@@ -614,7 +614,7 @@ internal fun assistantWords(config: AssistantConfig): String {
         !config.enabled -> stringResource(R.string.sum_ai_off)
         !configured -> stringResource(R.string.sum_ai_unset)
         else -> listOfNotNull(
-            modelWords(config.model.ifBlank { if (config.provider == Provider.CLAUDE) DEFAULT_CLAUDE else "" }),
+            modelWords(config.model.ifBlank { if (config.provider == Provider.CLAUDE) DEFAULT_CLAUDE else if (config.provider == Provider.MUSE) DEFAULT_MUSE else "" }),
             stringResource(R.string.sum_ai_glasses_voice).takeIf { config.glassesVoice },
         ).filter { it.isNotEmpty() }.joinToString(" · ")
     }
@@ -630,6 +630,11 @@ fun modelWords(id: String): String {
 }
 
 const val DEFAULT_CLAUDE = "claude-sonnet-5-5"
+
+/** Muse's default model, and the addresses the provider preset writes (dev.meta.ai; the OpenAI one mirrors AssistantConfig's default). */
+const val DEFAULT_MUSE = "muse-spark-1.3"
+const val MUSE_BASE_URL = "https://api.meta.ai/v1"
+const val OPENAI_BASE_URL = "https://api.openai.com/v1"
 
 /** Search over every page, Visor's own switches and every glasses setting; rows work right where they are found. */
 private fun androidx.compose.foundation.lazy.LazyListScope.searchResults(

@@ -478,6 +478,7 @@
     <string name="ai_key">API key</string>
     <string name="ai_key_sub">Pasted here, kept on this phone, sent only to the provider.</string>
     <string name="ai_key_needed">Needed for Claude</string>
+    <string name="ai_key_needed_muse">Needed for Muse</string>
     <string name="ai_key_optional">Only if the server asks for one</string>
     <string name="ai_key_checking">Asking the provider…</string>
     <string name="ai_key_works">Works · %1$d models</string>

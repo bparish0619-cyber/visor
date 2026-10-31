@@ -830,7 +830,7 @@ class Assistant(
             withTimeout(left) { brain.answer(transcript, spoken(l), pastOf(interaction), image, note, canEnd = true) }
         } catch (error: Exception) {
             problem = error.message ?: error::class.simpleName.orEmpty()
-            Reply(fallback(spoken(l), store.config.value.apiKey.isBlank() && store.config.value.provider == Provider.CLAUDE))
+            Reply(fallback(spoken(l), store.config.value.apiKey.isBlank() && store.config.value.provider != Provider.OPENAI_COMPATIBLE))
         }
         val text = reply.text
         // Without simplified forwarding the VARM follows the audio, and the glasses keep waiting for it until then.
@@ -895,7 +895,7 @@ class Assistant(
             brain.answer(question, spoken(l), pastOf(sub), image, liveAiNote())
         } catch (error: Exception) {
             problem = error.message ?: error::class.simpleName.orEmpty()
-            Reply(fallback(spoken(l), store.config.value.apiKey.isBlank() && store.config.value.provider == Provider.CLAUDE))
+            Reply(fallback(spoken(l), store.config.value.apiKey.isBlank() && store.config.value.provider != Provider.OPENAI_COMPATIBLE))
         }
         val text = reply.text
         update(sub) { it.copy(answer = text, problem = problem, modelMs = System.currentTimeMillis() - started, remembered = reply.remembered, actions = reply.actions) }
@@ -1159,7 +1159,7 @@ class Assistant(
         if (written != null && written.writtenAt > lastAt) return
         if (System.currentTimeMillis() - lastAt < windowMs() || linesFailed[date] == lastAt) return
         val c = store.config.value
-        if (c.apiKey.isBlank() && c.provider == Provider.CLAUDE) return
+        if (c.apiKey.isBlank() && c.provider != Provider.OPENAI_COMPATIBLE) return
         if (!writing.add(date)) return
         scope.launch {
             try {

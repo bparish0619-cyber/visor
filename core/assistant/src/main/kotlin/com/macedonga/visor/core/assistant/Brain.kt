@@ -23,8 +23,8 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-/** Where an answer comes from. */
-enum class Provider { CLAUDE, OPENAI_COMPATIBLE }
+/** Where an answer comes from. Muse is Meta's Model API: its own key and address, the OpenAI shape on the wire. */
+enum class Provider { CLAUDE, OPENAI_COMPATIBLE, MUSE }
 
 /** One question, its answer and what the tools did for it: the conversation behind the next question. */
 data class Exchange(val question: String, val answer: String, val actions: List<ToolAction> = emptyList())
@@ -115,6 +115,7 @@ class Brain(
         val text = when (c.provider) {
             Provider.CLAUDE -> claude(c, c.model.ifBlank { DEFAULT_CLAUDE_MODEL }, system, recent, question, image, tokens, c.webSearch, turn)
             Provider.OPENAI_COMPATIBLE -> openAi(c, c.model, system, recent, question, image, tokens, turn)
+            Provider.MUSE -> openAi(c, c.model.ifBlank { DEFAULT_MUSE_MODEL }, system, recent, question, image, tokens, turn)
         }.replace(VISOR_NOTE, "").trim()
         check(text.isNotEmpty()) { "the model gave an empty answer" }
         Reply(text, turn.remembered, turn.actions, turn.ends)
@@ -144,6 +145,7 @@ class Brain(
     private suspend fun write(c: AssistantConfig, model: String, system: String, text: String, tokens: Int): String = when (c.provider) {
         Provider.CLAUDE -> claude(c, model.ifBlank { DEFAULT_CLAUDE_MODEL }, system, emptyList(), text, null, tokens, false, null)
         Provider.OPENAI_COMPATIBLE -> openAi(c, model, system, emptyList(), text, null, tokens, null)
+        Provider.MUSE -> openAi(c, model.ifBlank { DEFAULT_MUSE_MODEL }, system, emptyList(), text, null, tokens, null)
     }.trim().also { check(it.isNotEmpty()) { "the model gave an empty answer" } }
 
     /** What the model knows of the wearer, and how to keep it. Empty when there is nowhere to keep it. */
@@ -398,6 +400,8 @@ class Brain(
         const val THINKING_TOKENS = 4_000
         const val PHONE_TOKENS = 900
         const val DEFAULT_CLAUDE_MODEL = "claude-sonnet-5-5"
+        // Muse answers at Meta's Model API (dev.meta.ai) when the wearer picks no model of its own.
+        const val DEFAULT_MUSE_MODEL = "muse-spark-1.3"
         const val SYSTEM_PROMPT =
             "You are the voice assistant in a pair of Meta smart glasses, run by the wearer's own app, Visor. " +
                 "Everything you write is spoken aloud through the glasses' speakers, so answer in one to three short, " +

@@ -74,7 +74,10 @@ jobs:
           META_AR_TOKEN: ${{ secrets.VISOR_META_AR_TOKEN }}
           META_FRL_TOKEN: ${{ secrets.VISOR_META_FRL_TOKEN }}
         run: |
-          for secret in KEYSTORE_BASE64 META_HW_TOKEN META_AR_TOKEN META_FRL_TOKEN; do
+          # Fork change: only the signing key is required. Meta's app tokens stay
+          # optional; without them the app builds and runs, but Meta login cannot
+          # complete (see README, Build from source).
+          for secret in KEYSTORE_BASE64; do
             if [ -z "${!secret}" ]; then
               echo "error: the VISOR_$secret secret is not set" >&2
               exit 1
